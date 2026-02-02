@@ -1,0 +1,6 @@
+Flask==2.3.3
+openai==1.6.1
+lyricsgenius==0.12.1
+requests==2.31.0
+python-dotenv==1.0.0
+Pillow==10.1.0

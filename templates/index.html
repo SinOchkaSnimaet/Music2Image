@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Музыка в Картины{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-music"></i> Создать шедевр </h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Введи исполнителя и название песни. Наш ИИ проанализирует его и создаст уникальное изображение.</p>
+
+                    <!-- ИСПРАВЛЕННАЯ ФОРМА -->
+                    <form id="searchForm" onsubmit="return handleSearch(event)">
+                        <div class="mb-3">
+                            <label for="artist" class="form-label">Исполнитель</label>
+                            <input type="text" class="form-control" id="artist" name="artist" placeholder="Например, Taylor Swift" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Название песни</label>
+                            <input type="text" class="form-control" id="title" name="title" placeholder="Например, Blank Space" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-palette"></i> Создать изображение
+                        </button>
+                    </form>
+
+                    <div class="mt-4">
+                        <p class="text-muted small"><i class="fas fa-lightbulb"></i> Совет: используйте известных исполнителей и песни для лучших результатов.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Как это работает</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Вы вводите исполнителя и название песни.</li>
+                        <li>Мы находим текст песни через Genius.com.</li>
+                        <li>OpenAI GPT анализирует текст и создает описание для изображения.</li>
+                        <li>OpenAI DALL-E генерирует уникальную картинку по этому описанию.</li>
+                        <li>Вы получаете готовое изображение!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript для обработки формы -->
+<script>
+function handleSearch(event) {
+    event.preventDefault();
+
+    const artist = document.getElementById('artist').value;
+    const title = document.getElementById('title').value;
+
+    if (!artist.trim() || !title.trim()) {
+        alert('Пожалуйста, заполните оба поля');
+        return false;
+    }
+
+    // Показываем сообщение о начале обработки
+    if (confirm(`Начать обработку песни "${title}" от ${artist}?`)) {
+        // Отправляем данные на сервер
+        fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                artist: artist,
+                title: title
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Перенаправляем на страницу обработки с task_id
+                window.location.href = data.redirect;
+            } else {
+                alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке запроса');
+        });
+    }
+
+    return false;
+}
+</script>
+{% endblock %}

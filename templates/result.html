@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Результат - {{ result.title }} - Музыка в Картины{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Заголовок -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-check-circle text-success"></i> Изображение готово!
+        </h1>
+        <p class="lead">
+            На основе песни <strong>"{{ result.title }}"</strong> 
+            от <strong>{{ result.artist }}</strong>
+        </p>
+    </div>
+    
+    <div class="row">
+        <!-- Изображение -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-image"></i> Сгенерированное изображение
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    {% if result.local_image %}
+                        <img src="{{ result.local_image }}" 
+                             alt="Изображение для {{ result.title }}"
+                             class="img-fluid rounded-bottom"
+                             id="generatedImage">
+                    {% elif result.image_url %}
+                        <img src="{{ result.image_url }}" 
+                             alt="Изображение для {{ result.title }}"
+                             class="img-fluid rounded-bottom"
+                             id="generatedImage">
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <p>Изображение временно недоступно</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100">
+                        <a href="{{ result.image_url or result.local_image }}" 
+                           class="btn btn-outline-primary" 
+                           download="{{ result.artist }}_{{ result.title }}.png"
+                           target="_blank">
+                            <i class="fas fa-download"></i> Скачать
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="shareResult()">
+                            <i class="fas fa-share-alt"></i> Поделиться
+                        </button>
+                        <button class="btn btn-outline-info" onclick="regenerateImage()">
+                            <i class="fas fa-redo"></i> Создать заново
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Информация -->
+        <div class="col-lg-4">
+            <!-- Детали песни -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-music"></i> Информация о песне
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Исполнитель:</strong> {{ result.artist }}</p>
+                    <p><strong>Песня:</strong> {{ result.title }}</p>
+                    {% if result.release_date %}
+                        <p><strong>Дата выпуска:</strong> {{ result.release_date }}</p>
+                    {% endif %}
+                    {% if result.genius_url %}
+                        <a href="{{ result.genius_url }}" target="_blank" 
+                           class="btn btn-sm btn-outline-dark w-100">
+                            <i class="fas fa-external-link-alt"></i> Текст на Genius
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Анализ AI -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-brain"></i> Анализ AI
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if result.analysis %}
+                        <p><strong>Основная тема:</strong> 
+                           <span class="badge bg-primary">{{ result.analysis.theme }}</span>
+                        </p>
+                        <p><strong>Настроение:</strong> 
+                           <span class="badge bg-info">{{ result.analysis.mood }}</span>
+                        </p>
+                        <p><strong>Ключевые образы:</strong><br>
+                           <small>{{ result.analysis.images }}</small>
+                        </p>
+                        <p><strong>Цвета:</strong><br>
+                           <small>{{ result.analysis.colors }}</small>
+                        </p>
+                        <p><strong>Стиль:</strong> 
+                           <span class="badge bg-secondary">{{ result.analysis.style }}</span>
+                        </p>
+                    {% endif %}
+                    
+                    {% if result.generated_prompt %}
+                        <div class="mt-3">
+                            <strong>Промпт для DALL-E:</strong>
+                            <div class="prompt-box bg-light p-2 mt-2 rounded small">
+                                {{ result.generated_prompt }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Статистика -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Статистика
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if result.processing_time %}
+                        <p><strong>Время обработки:</strong> 
+                           {{ "%.1f"|format(result.processing_time) }} секунд
+                        </p>
+                    {% endif %}
+                    <p><strong>Использованные технологии:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fab fa-python text-primary"></i> Flask</li>
+                        <li><i class="fas fa-robot text-success"></i> GPT-4</li>
+                        <li><i class="fas fa-palette text-warning"></i> DALL-E 3</li>
+                        <li><i class="fas fa-database text-info"></i> Genius API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Новый поиск -->
+    <div class="text-center mt-5">
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus"></i> Создать новое изображение
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function shareResult() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Изображение по песне "{{ result.title }}"',
+            text: 'Посмотри на изображение, созданное ИИ на основе песни {{ result.artist }} - {{ result.title }}',
+            url: window.location.href
+        });
+    } else {
+        // Копируем ссылку в буфер обмена
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => alert('Ссылка скопирована в буфер обмена!'));
+    }
+}
+
+function regenerateImage() {
+    if (confirm('Создать новое изображение на основе этой же песни?')) {
+        // Отправляем запрос на повторную генерацию
+        fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                artist: '{{ result.artist }}',
+                title: '{{ result.title }}'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        });
+    }
+}
+
+// Автоматически обновляем изображение если оно было изменено
+document.addEventListener('DOMContentLoaded', function() {
+    const image = document.getElementById('generatedImage');
+    if (image) {
+        // Добавляем timestamp к URL изображения для избежания кэширования
+        setInterval(() => {
+            const src = image.src;
+            if (src.includes('openai')) {
+                const newSrc = src.split('?')[0] + '?t=' + new Date().getTime();
+                image.src = newSrc;
+            }
+        }, 30000);
+    }
+});
+</script>
+{% endblock %}

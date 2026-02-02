@@ -1,0 +1,175 @@
+/* Основные стили */
+:root {
+    --primary-color: #6c63ff;
+    --secondary-color: #4a44c6;
+    --accent-color: #ff6584;
+    --dark-color: #2a2d43;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f7ff;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+
+/* Навигация */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Главная страница */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0 0 30px 30px;
+}
+
+.search-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: none;
+}
+
+.search-form .form-control {
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.search-form .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
+}
+
+/* Карточки */
+.card {
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+/* Иконки шагов */
+.step-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+}
+
+/* Прогресс бар */
+.progress-bar-animated {
+    background: linear-gradient(45deg,
+        rgba(255,255,255,0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255,255,255,0.2) 50%,
+        rgba(255,255,255,0.2) 75%,
+        transparent 75%,
+        transparent);
+    background-size: 1rem 1rem;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% { background-position: 1rem 0; }
+    100% { background-position: 0 0; }
+}
+
+/* Изображение результата */
+#generatedImage {
+    max-height: 600px;
+    object-fit: contain;
+    background: #f8f9fa;
+}
+
+/* Бейджи */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+}
+
+/* Промпт */
+.prompt-box {
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-left: 4px solid var(--primary-color);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        margin-bottom: 5px;
+        border-radius: 5px !important;
+    }
+}
+
+/* Специфичные стили для примеров песен */
+.song-example {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.song-example:hover {
+    background-color: var(--light-color);
+}
+
+.song-example .use-song {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.song-example:hover .use-song {
+    opacity: 1;
+}
+
+/* Загрузка */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Утилиты */
+.rounded-bottom {
+    border-bottom-left-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+}

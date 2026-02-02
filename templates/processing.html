@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Обработка - Музыка в Картины{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card shadow-lg">
+                <div class="card-body py-5">
+                    <!-- Анимация загрузки -->
+                    <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+
+                    <h3 class="mt-4">Обработка запроса...</h3>
+                    <p class="lead">Пожалуйста, подождите. ИИ анализирует песню и создает изображение.</p>
+
+                    {% if task %}
+                    <div class="progress mt-4">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             style="width: {{ task.progress }}%"></div>
+                    </div>
+                    <p class="mt-2">{{ task.step }}</p>
+                    <p class="text-muted" id="timer">Прошло: 0 секунд</p>
+
+                    <!-- JavaScript для обновления статуса -->
+                    <script>
+                    let seconds = 0;
+                    const timerElement = document.getElementById('timer');
+
+                    // Обновляем таймер каждую секунду
+                    setInterval(() => {
+                        seconds++;
+                        timerElement.textContent = `Прошло: ${seconds} секунд`;
+                    }, 1000);
+
+                    // Если есть task_id, периодически проверяем статус
+                    {% if task.id %}
+                    const taskId = '{{ task.id }}';
+
+                    function checkStatus() {
+                        fetch(`/api/status/${taskId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const task = data.task;
+
+                                    // Обновляем прогресс
+                                    document.querySelector('.progress-bar').style.width = `${task.progress}%`;
+                                    document.querySelector('.progress-bar').textContent = `${task.progress}%`;
+
+                                    // Обновляем текст шага
+                                    const stepElement = document.querySelector('.mt-2');
+                                    if (stepElement) {
+                                        stepElement.textContent = task.step;
+                                    }
+
+                                    // Если задача завершена, перенаправляем на результат
+                                    if (task.status === 'completed') {
+                                        window.location.href = `/result/${taskId}`;
+                                    }
+                                    // Если ошибка, показываем сообщение
+                                    else if (task.status === 'error') {
+                                        document.querySelector('.lead').textContent = 'Произошла ошибка: ' + (task.error || 'Неизвестная ошибка');
+                                        document.querySelector('.lead').classList.add('text-danger');
+                                        document.querySelector('.spinner-border').style.display = 'none';
+                                    }
+                                    // Если все еще в процессе, продолжаем проверять
+                                    else {
+                                        setTimeout(checkStatus, 3000);
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Ошибка при проверке статуса:', error);
+                                setTimeout(checkStatus, 3000);
+                            });
+                    }
+
+                    // Запускаем проверку статуса через 2 секунды
+                    setTimeout(checkStatus, 2000);
+                    {% endif %}
+                    </script>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <h5>Задача не найдена</h5>
+                        <p>Ссылка на задачу устарела или была удалена.</p>
+                        <a href="/" class="btn btn-primary">Вернуться на главную</a>
+                    </div>
+                    {% endif %}
+                    
+                    <p class="text-muted mt-4">Это может занять несколько минут</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
